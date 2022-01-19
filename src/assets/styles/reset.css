@@ -1,0 +1,58 @@
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+
+html,
+body,
+div,
+span,
+a,
+section,
+header,
+footer,
+main,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+img,
+ul,
+li,
+ol,
+form,
+article,
+aside {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+body {
+  scroll-behavior: smooth;
+  margin: 0;
+  font-size: 1rem;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  text-decoration: none;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+}
