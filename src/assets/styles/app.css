@@ -18,6 +18,7 @@ p {
   width: -moz-max-content;
   width: max-content;
   border-radius: 5px;
+  z-index: 5;
 }
 .dropdown a {
   text-decoration: none;
