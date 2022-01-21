@@ -23,8 +23,9 @@ if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
 
 function Library() {
   const [parseResults, setParseResults] = useState([]);
+  const [getSongs, setGetSongs] = useState([]);
   const inputRef = useRef(null);
-  const storage = getStorage();
+
   const uploadMusic = async (e) => {
     const storage = getStorage();
 
@@ -34,16 +35,22 @@ function Library() {
       const parseResult = {
         file: file,
       };
-
+      const songsRef = ref(storage, "songs/" + parseResult.file.name);
+      uploadBytes(songsRef, file).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+          const songInfo = {
+            audioUrl: url,
+            audioName: snapshot.ref.name,
+          };
+          setGetSongs([songInfo]);
+        });
+      });
       setParseResults(parseResults.push(parseResult));
       try {
         const metadata = await parseFile(file);
         setParseResults(
           (parseResults[parseResults.length - 1].metadata = metadata)
         );
-
-        const songsRef = ref(storage, "songs/" + parseResult.file.name);
-        uploadBytes(songsRef, parseResult).then((snapshot) => {});
         return parseResults;
       } catch (err) {
         console.log(err);
@@ -64,39 +71,28 @@ function Library() {
     }
   };
 
-  // Create a reference under which you want to list
-  const listRef = ref(storage, "songs/");
-  const htmlParse = [];
-  // Find all the prefixes and items.
-  listAll(listRef)
-    .then((res) => {
-      // res.prefixes.forEach((folderRef) => {
-      //   // All the prefixes under listRef.
-      //   // You may call listAll() recursively on them.
-      //   console.log(folderRef);
-      // });
+  const playSong = (e, url) => {
+    const song = new Audio(url);
+    song.play();
+  };
 
-      res.items.forEach((itemRef) => {
-        getDownloadURL(itemRef).then((url) => {
-          console.log(url);
-          console.log(itemRef.name);
-          htmlParse.push(
-            <li>
-              {itemRef.name}
-              <audio src={url} />
-            </li>
-          );
-        });
-      });
-      // });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
   return (
     <StyledLibraryDiv>
       <div className="songsList">
-        <ul>{htmlParse}</ul>
+        <ul>
+          {getSongs.map((getSong, index) => {
+            return (
+              <li
+                key={index}
+                onClick={(e) => {
+                  playSong(e, getSong.audioUrl);
+                }}
+              >
+                {getSong.audioName}
+              </li>
+            );
+          })}
+        </ul>
       </div>
       <UploadMusic
         handleClick={handleClick}
