@@ -14,7 +14,6 @@ const UploadButton = (props) => {
 function UploadMusic({ handleClick, uploadMusic, inputRef }) {
   return (
     <div>
-      <div className="playlist"></div>
       <input
         type="file"
         accept=".mp3, .wav, .ogg"
@@ -38,4 +37,6 @@ const Button = styled(BsPlusSquare)`
   cursor: pointer;
   width: 40px;
   height: 40px;
+  position: absolute;
+  bottom: 0;
 `;
