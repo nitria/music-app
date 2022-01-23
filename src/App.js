@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import "./assets/styles/app.css";
 import User from "./components/user/User";
@@ -15,25 +15,8 @@ function App() {
   const [users, setUsers] = useState();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [dropdown, setDropdown] = useState(false);
 
   let navigate = useNavigate();
-  const dropdownRef = useRef();
-
-  //Close user submenu if clicked outside of submenu
-  const clickOutside = (e) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setDropdown(false);
-    }
-  };
-
-  //EventListener for clickOutside function
-  useEffect(() => {
-    document.addEventListener("mousedown", clickOutside);
-    return () => {
-      document.removeEventListener("mousedown", clickOutside);
-    };
-  });
 
   //If user is authenticate go to main else to register
   useEffect(() => {
@@ -65,9 +48,6 @@ function App() {
           setUsers={setUsers}
           navigate={navigate}
           email={email}
-          dropdown={dropdown}
-          setDropdown={setDropdown}
-          dropdownRef={dropdownRef}
         />
       </StyledHeader>
       <StyledMainContainer>

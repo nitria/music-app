@@ -12,7 +12,6 @@ import {
 import * as mmb from "music-metadata-browser";
 import { Buffer } from "buffer";
 import * as process from "process";
-import { BsCheckLg } from "react-icons/bs";
 
 if (typeof window !== "undefined" && typeof window.process === "undefined") {
   window.process = process;
@@ -21,10 +20,10 @@ if (typeof window !== "undefined" && typeof window.process === "undefined") {
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
 }
-
+const songsArray = [];
 function Library() {
   const [parseResults, setParseResults] = useState([]);
-  const [getSongs, setGetSongs] = useState([]);
+  const [getSongs, setGetSongs] = useState(songsArray);
   const inputRef = useRef(null);
   const storage = getStorage();
 
@@ -70,17 +69,16 @@ function Library() {
     }
   };
 
-  const playSong = (e, url) => {
-    console.log(e.target);
+  const playSong = (url) => {
     const song = new Audio(url);
     song.play();
   };
 
   useEffect(() => {
-    const songsArray = [];
     const getSongsFromServer = ref(storage, "songs/");
-    const getList = async () => {
-      await listAll(getSongsFromServer).then((res) => {
+
+    const getList = () => {
+      listAll(getSongsFromServer).then((res) => {
         res.items.forEach((item) => {
           getDownloadURL(item).then((url) => {
             const songInfo = {
@@ -92,21 +90,21 @@ function Library() {
         });
       });
     };
-
-    setGetSongs(songsArray);
     getList();
+    setGetSongs(songsArray);
+    return () => {
+      getList();
+    };
   }, [storage]);
+
   return (
     <StyledLibraryDiv>
       <div className="songsList">
         <ul>
-          {getSongs.map((getSong, index) => {
-            const { audioUrl, audioName } = getSong;
-            console.log(audioName);
+          {getSongs.map((song, index) => {
             return (
-              <li key={index} onDoubleClick={(e) => playSong(e, audioUrl)}>
-                {index + 1}
-                {audioName}
+              <li key={index} onDoubleClick={playSong(song.audioUrl)}>
+                {song.audioName}
               </li>
             );
           })}

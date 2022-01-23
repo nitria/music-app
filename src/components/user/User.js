@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import "../../assets/styles/app.css";
@@ -7,20 +7,30 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 import { signOut, getAuth } from "firebase/auth";
 
-function User({
-  users,
-  setUsers,
-  navigate,
-  email,
-  dropdown,
-  setDropdown,
-  dropdownRef,
-}) {
+function User({ users, setUsers, navigate, email }) {
+  const [dropdown, setDropdown] = useState(false);
   const auth = getAuth();
   const authUser = auth.currentUser;
+  const dropdownRef = useRef();
+
+  //Close user submenu if clicked outside of submenu
+  const clickOutside = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setDropdown(false);
+    }
+  };
+
+  //EventListener for clickOutside function
+  useEffect(() => {
+    document.addEventListener("mousedown", clickOutside);
+    return () => {
+      document.removeEventListener("mousedown", clickOutside);
+    };
+  });
 
   //Function to open user dropdown menu//
   const expandDropdown = () => {
+    console.log("first");
     setDropdown(!dropdown);
   };
 
