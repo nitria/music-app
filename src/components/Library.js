@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import "../assets/styles/app.css";
 import UploadMusic from "./UploadMusic";
@@ -9,9 +9,10 @@ import {
   getDownloadURL,
   uploadBytes,
 } from "firebase/storage";
-import * as mmb from "music-metadata-browser";
+// import * as mmb from "music-metadata-browser";
 import { Buffer } from "buffer";
 import * as process from "process";
+import { useAppContext } from "../context/useContext";
 
 if (typeof window !== "undefined" && typeof window.process === "undefined") {
   window.process = process;
@@ -20,48 +21,47 @@ if (typeof window !== "undefined" && typeof window.process === "undefined") {
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
 }
-const songsArray = [];
+
+const storage = getStorage();
+const songArray = [];
+const getSongsFromServer = ref(storage, "songs/");
+async function getList() {
+  await listAll(getSongsFromServer).then((res) => {
+    res.items.forEach((item) => {
+      var songInfo = {};
+      getDownloadURL(item).then((url) => {
+        songInfo = {
+          audioName: item.name,
+          audioUrl: url,
+        };
+        songArray.push(songInfo);
+      });
+    });
+  });
+}
+
+getList();
+
 function Library() {
   const [parseResults, setParseResults] = useState([]);
-  const [getSongs, setGetSongs] = useState(songsArray);
+  const [getSongs, setGetSongs] = useState(songArray);
+  const { selectSong, selectedSong } = useAppContext();
   const inputRef = useRef(null);
-  const storage = getStorage();
-
   const uploadMusic = async (e) => {
     setParseResults([]);
-
     for (const file of e.target.files) {
       const parseResult = {
         file: file,
       };
       const songsRef = ref(storage, "songs/" + parseResult.file.name);
       uploadBytes(songsRef, file).then((snapshot) => {
-        // getDownloadURL(snapshot.ref).then((url) => {
-        //   const songInfo = {
-        //     audioUrl: url,
-        //     audioName: snapshot.ref.name,
-        //   };
-        //   setGetSongs([songInfo]);
-        // });
+        getDownloadURL(snapshot.ref).then((url) => {
+          return url;
+        });
       });
       setParseResults(parseResult);
-      // try {
-      //   const metadata = await parseFile(file);
-      //   setParseResults(
-      //     (parseResults[parseResults.length - 1].metadata = metadata)
-      //   );
-      //   return parseResults;
-      // } catch (err) {
-      //   console.log(err);
-      // }
     }
   };
-
-  // async function parseFile(file) {
-  //   return mmb.parseBlob(file).then((metadata) => {
-  //     return metadata;
-  //   });
-  // }
 
   const handleClick = () => {
     if (inputRef) {
@@ -69,43 +69,22 @@ function Library() {
     }
   };
 
-  const playSong = (url) => {
-    const song = new Audio(url);
-    song.play();
-  };
-
-  useEffect(() => {
-    const getSongsFromServer = ref(storage, "songs/");
-
-    const getList = () => {
-      listAll(getSongsFromServer).then((res) => {
-        res.items.forEach((item) => {
-          getDownloadURL(item).then((url) => {
-            const songInfo = {
-              audioName: item.name,
-              audioUrl: url,
-            };
-            songsArray.push(songInfo);
-          });
-        });
-      });
-    };
-    getList();
-    setGetSongs(songsArray);
-    return () => {
-      getList();
-    };
-  }, [storage]);
-
   return (
     <StyledLibraryDiv>
       <div className="songsList">
         <ul>
-          {getSongs.map((song, index) => {
+          {getSongs.map((item, index) => {
             return (
-              <li key={index} onDoubleClick={playSong(song.audioUrl)}>
-                {song.audioName}
-              </li>
+              <StyledList
+                title={item.audioName}
+                className={`${selectedSong === index ? "active" : ""}`}
+                key={index}
+                onClick={(e) => {
+                  selectSong(e, index, item.audioUrl, item.audioName);
+                }}
+              >
+                {item.audioName}
+              </StyledList>
             );
           })}
         </ul>
@@ -126,5 +105,16 @@ const StyledLibraryDiv = styled.div`
   border-left: 1px solid var(--darkwhite);
   height: 100%;
   max-width: 300px;
-  padding: 1rem;
+  padding: 1rem 0;
+`;
+const StyledList = styled.li`
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  cursor: default;
+  user-select: none;
+  &.active,
+  &:hover {
+    background-color: var(--primaryColor);
+  }
 `;

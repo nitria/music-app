@@ -4,11 +4,16 @@ import "../assets/styles/app.css";
 import SongDetails from "./SongDetails";
 import Library from "./Library";
 
-function Main() {
+function Main({ playSong, selectSong, navigate, selectedSong }) {
   return (
     <StyledMain>
       <SongDetails />
-      <Library />
+      <Library
+        playSong={playSong}
+        selectSong={selectSong}
+        navigate={navigate}
+        selectedSong={selectedSong}
+      />
     </StyledMain>
   );
 }

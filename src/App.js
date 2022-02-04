@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import "./assets/styles/app.css";
 import User from "./components/user/User";
@@ -10,11 +10,11 @@ import UserSettings from "./components/user/UserSettings";
 import Form from "./components/user/Form";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
+import { useAppContext } from "./context/useContext";
 
 function App() {
-  const [users, setUsers] = useState();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { users, setUsers, password, setPassword, email, setEmail } =
+    useAppContext();
 
   let navigate = useNavigate();
 
@@ -84,9 +84,7 @@ function App() {
           />
         </Routes>
       </StyledMainContainer>
-      <StyledFooter>
-        <ControlButtons />
-      </StyledFooter>
+      <ControlButtons />
     </StyledContainer>
   );
 }
@@ -111,4 +109,4 @@ const StyledMainContainer = styled.main`
   position: relative;
 `;
 
-const StyledFooter = styled(StyledHeader)``;
+// const StyledFooter = styled(StyledHeader)``;
